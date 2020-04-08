@@ -13,8 +13,8 @@ var getList = function (key, fn) {
 }
 
 
-var addElementTo = function(key, element) {
-    client.rpush([key, JSON.stringify(element)], function (err, res) {
+var addElementTo = function(key, elem) {
+    client.rpush([key, JSON.stringify(elem)], function (err, res) {
         // do something on insert
     });
 }
