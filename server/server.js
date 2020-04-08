@@ -3,18 +3,42 @@ const express = require('express');
 const app = express();
 const http = require('http').Server(app);
 const io = require('socket.io')(http);
-
-// Params
 const PORT = 3000;
 
+
 // User http requests are redirected to 'public' folder
-app.use("/", express.static(__dirname + "/public"));
+app.use("/", express.static(__dirname + "/../public"));
+
+
+const redisUtils = require('./redis_utils');
+const client = redisUtils.Rclient;
+
+
+/**
+ * Listening redis error
+ */
+client.on('error', function (error) {
+    console.error(error);
+})
+
+/**
+ * Listening connection on redis server
+ */
+client.on('connect', function (err, res) {
+    console.log('connected to redis server');
+})
 
 
 /**
  * Connected user list (Redis)
  */
-var users = [];
+var k_users = "usr_connected";
+var users; 
+// get connected users
+redisUtils.getList(k_users, function (list) {   
+    users = list;
+});
+
 
 /**
  * User currently typing in chat input
@@ -34,21 +58,21 @@ var srvc_messages = [];
 //const SRVC_LIMIT = 150;
 
 
-// EVENTS
+/* ===========================================
+    EVENTS
+=========================================== */
 
 io.on('connection', function(socket) {
 
-    /**
-     * Last connected user
-     */
-    var loggedUser;
-
-    
     /**
      * Connection logging
      */
     console.log('user connected to server');
 
+    /**
+     * Last connected user
+     */
+    var loggedUser;
 
     /**
      * Event emission : send connected user list to all connected users
@@ -59,7 +83,7 @@ io.on('connection', function(socket) {
 
 
     /**
-     * Event emission : send each message in history
+     * Event emission : send each message from history (MongoDB)
      */
     for (i = 0; i < messages.length; i++) {
         if (messages[i].username !== undefined) {
@@ -76,7 +100,7 @@ io.on('connection', function(socket) {
      */
     socket.on('disconnect', function() {
         if(loggedUser !== undefined) {
-            
+
             // JSON service message
             let serviceMessage = {
                 text : loggedUser.username + ' logged out',
@@ -84,11 +108,12 @@ io.on('connection', function(socket) {
             };
             socket.broadcast.emit('service-message', serviceMessage);
 
-            // Remove it from conneted list
-            let userIndex = users.indexOf(loggedUser);
-            if (userIndex !== -1) {
-                users.splice(userIndex, 1);
-            }
+            // Remove it from conneted list and refresh list
+            redisUtils.removeElementFrom(k_users, loggedUser);
+            redisUtils.getList(k_users, function (list) {   
+                users = list;
+            });
+
             io.emit('user-logout', loggedUser);
 
             // Add to history
@@ -120,8 +145,12 @@ io.on('connection', function(socket) {
         }
         // Do things
         if(user !== undefined && userIndex === -1) {
-            loggedUser = user;          // SAVE USER (MongoDB)
-            users.push(loggedUser);     // push it to connected user list (Redis)
+            loggedUser = user;  // SAVE USER (MongoDB)
+            // add it to connected list and refresh list
+            redisUtils.addElementTo(k_users, loggedUser);
+            redisUtils.getList(k_users, function (list) {   
+                users = list;
+            });
             // JSON user service message
             usr_serviceMessage = {
                 text : 'Logged in as ' + loggedUser.username,
@@ -132,12 +161,12 @@ io.on('connection', function(socket) {
                 text : loggedUser.username + ' logged in',
                 type : 'login'
             };
+            // EMIT service messages
             socket.emit('service-message', usr_serviceMessage);
             socket.broadcast.emit('service-message', brdc_serviceMessage);
-            // Push service message to history
-            srvc_messages.push(brdc_serviceMessage);
-            // Emit 'user-login' and callback
-            io.emit('user-login', loggedUser);
+            
+            srvc_messages.push(brdc_serviceMessage);    // Push service message to history
+            io.emit('user-login', loggedUser);          // Emit 'user-login' and callback
             callback(true);
         } 
         else {

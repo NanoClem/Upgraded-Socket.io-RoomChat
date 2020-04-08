@@ -11,8 +11,9 @@ function scrollToBottom() {
   }
 
 
-
-// EVENTS
+/* ===========================================
+    EVENTS
+=========================================== */
 
 /**
  * Event reception : user logged in
