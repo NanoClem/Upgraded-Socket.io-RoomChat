@@ -1,6 +1,5 @@
 <!doctype html>
 <html>
-
   <head>
     <link rel="stylesheet" href="style.css" />
     <title>Socket.IO chat</title>
@@ -8,16 +7,31 @@
     </style>
   </head>
 
-  <body>
+  <body id="logged-out">
+
+    <!-- CHAT -->
     <section id="chat">
-      <ul id="messages"></ul>
+      <ul id="messages"></ul><ul id="users"></ul>  <!-- connected users-->
       <form action="">
-        <input id="m" autocomplete="off" />
-        <button>Send</button>
+        <input id="m" autocomplete="off" /><button>Send</button>
       </form>
     </section>
-    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
-    <script src="client.js"></script>
-  </body>
 
+    <!-- LOGIN -->
+    <section id='login'>
+        <form action="">
+            <label for="u">Username</label>
+            <input id="u" type="text" autocomplete="off" autofocus>
+            <p>
+                <button>Login</button>
+            </p>
+        </form>
+    </section>
+
+    <!-- JS -->
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="client.js"></script>
+
+  </body>
 </html>
