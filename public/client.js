@@ -20,7 +20,7 @@ function scrollToBottom() {
  */
 socket.on('user-login', function(user) {
     if(user !== undefined) {
-        $('#users').append($('<li class="' + user.username + ' new">').html(user.username));
+        $('#users').append($('<li class="' + user.username + ' new">').html(user.username + '<span class="typing">typing...</span>'));
         setTimeout(function () {
             $('#users li.new').removeClass('new');
         }, 1000);
@@ -59,6 +59,18 @@ socket.on('service-message', function(message) {
 
 
 /**
+ * Event reception : 'update-typing'
+ * Manage other users typing
+ */
+socket.on('update-typing', function (typingUsers) {
+    $('#users li span.typing').hide();
+    for (i = 0; i < typingUsers.length; i++) {
+        $('#users li.' + typingUsers[i].username + ' span.typing').show();
+  }
+});
+
+
+/**
  * Event emission : user connection
  */
 $('#login form').submit(function(e) {
@@ -93,4 +105,31 @@ $('#chat form').submit(function(e) {
         socket.emit('chat-message', message);   // emit event with associated message
     }
     $('#chat input').focus();   // focus on message field
+});
+
+
+/**
+ * Event emission : detect user typing
+ */
+let typingTimer;
+let isTyping = false;
+
+// User started typing
+$('#m').keypress(function () {
+    clearTimeout(typingTimer);
+    if (!isTyping) {
+      socket.emit('start-typing');
+      isTyping = true;
+    }
+  });
+  
+// User stopped typing
+$('#m').keyup(function () {
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(function () {
+        if (isTyping) {
+        socket.emit('stop-typing');
+        isTyping = false;
+        }
+    }, 1000);
 });

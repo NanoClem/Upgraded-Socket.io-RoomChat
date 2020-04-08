@@ -76,7 +76,7 @@ io.on('connection', function(socket) {
      */
     socket.on('disconnect', function() {
         if(loggedUser !== undefined) {
-
+            
             // JSON service message
             let serviceMessage = {
                 text : loggedUser.username + ' logged out',
@@ -93,6 +93,12 @@ io.on('connection', function(socket) {
 
             // Add to history
             srvc_messages.push(serviceMessage);
+
+            // If user was typing
+            let typingUserIndex = typingUsers.indexOf(loggedUser);
+            if (typingUserIndex !== -1) {
+                typingUsers.splice(typingUserIndex, 1);
+              }
         }
         console.log('user disconnected from server');
     });
@@ -152,6 +158,31 @@ io.on('connection', function(socket) {
             messages.splice(0, 1);
         }
         console.log('Message from : ' + loggedUser.username);
+    });
+
+
+    /**
+     * Event reception : 'start-typing'
+     * User start to type his message
+     */
+    socket.on('start-typing', function () {
+        if (typingUsers.indexOf(loggedUser) === -1) {
+            typingUsers.push(loggedUser);
+        }
+        io.emit('update-typing', typingUsers);
+    });
+
+
+    /**
+     * Event reception : 'stop-typing'
+     * User stopped typing his message
+     */
+    socket.on('stop-typing', function () {
+        let typingUserIndex = typingUsers.indexOf(loggedUser);
+        if (typingUserIndex !== -1) {
+            typingUsers.splice(typingUserIndex, 1);
+          }
+          io.emit('update-typing', typingUsers);
     });
 });
 

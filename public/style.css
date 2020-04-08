@@ -114,6 +114,13 @@ section#chat #users li {
     transition: all 0.5s;
 }
 
+section#chat #users li span.typing {
+    float: right;
+    font-style: italic;
+    color: rgb(116, 14, 14);
+    display: none;
+}
+
 
 /* SERVICE MESSAGE */
 
