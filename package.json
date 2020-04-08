@@ -1,0 +1,22 @@
+{
+  "name": "upgraded-socket.io-chat",
+  "version": "1.0.0",
+  "description": "Chat with user management using MongoDB and Redis",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NanoClem/Upgraded-Socket.io-RoomChat.git"
+  },
+  "author": "Clement DECOOPMAN",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NanoClem/Upgraded-Socket.io-RoomChat/issues"
+  },
+  "homepage": "https://github.com/NanoClem/Upgraded-Socket.io-RoomChat#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
