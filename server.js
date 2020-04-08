@@ -11,6 +11,19 @@ const PORT = 3000;
 app.use("/", express.static(__dirname + "/public"));
 
 
+/**
+     * Connected user list (Redis)
+     */
+    var users = [];
+
+    /**
+     * Message history (MongoDB)
+     */
+    var messages = [];
+    const MSG_LIMIT = 150;
+
+
+
 // EVENTS
 
 io.on('connection', function(socket) {
@@ -20,22 +33,15 @@ io.on('connection', function(socket) {
      */
     var loggedUser;
 
-    /**
-     * Connected user list (Redis)
-     */
-    var users = [];
-
-    /**
-     * Message history
-     */
-
+    
     /**
      * Connection logging
      */
     console.log('user connected to server');
 
+
     /**
-     * Send connected user list to all connected users
+     * Event emission : send connected user list to all connected users
      */
     for(i = 0; i < users.length; i++) {
         socket.emit('user-login', user[i]);
@@ -43,7 +49,7 @@ io.on('connection', function(socket) {
 
 
     /**
-     * User disconnected : broadcast 'service-message'
+     * Event reception : user disconnected, broadcast 'service-message'
      */
     socket.on('disconnect', function() {
         if(loggedUser !== undefined) {
@@ -66,7 +72,7 @@ io.on('connection', function(socket) {
 
     
     /**
-     * User connected with login form :
+     * Event reception : user connected with login form
      *   - saving user
      *   - broadcast 'service-message'
      */
@@ -79,7 +85,6 @@ io.on('connection', function(socket) {
                 userIndex = i;
             }
         }
-
         // Do things
         if(user !== undefined && userIndex === -1) {
             loggedUser = user;          // SAVE USER (MongoDB)
@@ -107,6 +112,7 @@ io.on('connection', function(socket) {
 
     /**
      * Event reception : 'chat-message', re-emission to all users
+     * Add message to history and purge if necessary
      */
     socket.on('chat-message', function(message) {
         message.username = loggedUser.username;     // adding user
