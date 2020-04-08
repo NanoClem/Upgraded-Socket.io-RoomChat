@@ -12,16 +12,26 @@ app.use("/", express.static(__dirname + "/public"));
 
 
 /**
-     * Connected user list (Redis)
-     */
-    var users = [];
+ * Connected user list (Redis)
+ */
+var users = [];
 
-    /**
-     * Message history (MongoDB)
-     */
-    var messages = [];
-    const MSG_LIMIT = 150;
+/**
+ * User currently typing in chat input
+ */
+var typingUsers = [];
 
+/**
+ * Messages history (MongoDB)
+ */
+var messages = [];
+const MSG_LIMIT = 150;
+
+/**
+ * Service messages history (MongoDB)
+ */
+var srvc_messages = [];
+//const SRVC_LIMIT = 150;
 
 
 // EVENTS
@@ -44,7 +54,20 @@ io.on('connection', function(socket) {
      * Event emission : send connected user list to all connected users
      */
     for(i = 0; i < users.length; i++) {
-        socket.emit('user-login', user[i]);
+        socket.emit('user-login', users[i]);
+    }
+
+
+    /**
+     * Event emission : send each message in history
+     */
+    for (i = 0; i < messages.length; i++) {
+        if (messages[i].username !== undefined) {
+            socket.emit('redirected-message', messages[i]);
+        }
+        else {
+            socket.emit('service-message', messages[i])
+        }
     }
 
 
@@ -56,7 +79,7 @@ io.on('connection', function(socket) {
 
             // JSON service message
             let serviceMessage = {
-                text : loggedUser.username + ' disconnected',
+                text : loggedUser.username + ' logged out',
                 type : 'logout'
             };
             socket.broadcast.emit('service-message', serviceMessage);
@@ -67,7 +90,11 @@ io.on('connection', function(socket) {
                 users.splice(userIndex, 1);
             }
             io.emit('user-logout', loggedUser);
+
+            // Add to history
+            srvc_messages.push(serviceMessage);
         }
+        console.log('user disconnected from server');
     });
 
     
@@ -99,7 +126,10 @@ io.on('connection', function(socket) {
                 text : loggedUser.username + ' logged in',
                 type : 'login'
             };
+            socket.emit('service-message', usr_serviceMessage);
             socket.broadcast.emit('service-message', brdc_serviceMessage);
+            // Push service message to history
+            srvc_messages.push(brdc_serviceMessage);
             // Emit 'user-login' and callback
             io.emit('user-login', loggedUser);
             callback(true);
@@ -117,6 +147,10 @@ io.on('connection', function(socket) {
     socket.on('chat-message', function(message) {
         message.username = loggedUser.username;     // adding user
         io.emit('redirected-message', message);     // re-emit message to all user
+        messages.push(message);                     // push message to history (MongoDB)
+        if (messages.length > MSG_LIMIT) {
+            messages.splice(0, 1);
+        }
         console.log('Message from : ' + loggedUser.username);
     });
 });
