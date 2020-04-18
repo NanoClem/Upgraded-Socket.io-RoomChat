@@ -5,13 +5,38 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const PORT = 3000;
 
-
 // User http requests are redirected to 'public' folder
 app.use("/", express.static(__dirname + "/../public"));
+app.use(express.urlencoded({ extended: false }));
 
+// API
+const APIRoutes = require('../api/routes');
+app.use(APIRoutes);
 
+// Redis
 const redisUtils = require('./redis_utils');
 const client = redisUtils.Rclient;
+
+// Body parser
+const bodyParser = require('body-parser');
+app.use(bodyParser.urlencoded ( {
+	extended : true
+}));
+app.use(bodyParser.json());
+
+
+/**
+ * Connection to mongoDB
+ */
+const mongoose = require('mongoose');
+mongoose.set('useNewUrlParser', true);      // using new parser
+mongoose.set('useUnifiedTopology', true);
+database = 'mongodb://localhost:27017/chatDB';
+mongoose.connect(database, (err)=> {
+	if (err)
+		throw err;
+	console.log('connected to database');
+});
 
 
 /**
@@ -33,12 +58,10 @@ client.on('connect', function (err, res) {
  * Connected user list (Redis)
  */
 var k_users = "usr_connected";
-var users; 
-// get connected users
+var users = [];
 redisUtils.getList(k_users, function (list) {   
     users = list;
 });
-
 
 /**
  * User currently typing in chat input
@@ -74,6 +97,7 @@ io.on('connection', function(socket) {
      */
     var loggedUser;
 
+   
     /**
      * Event emission : send connected user list to all connected users
      */
@@ -136,7 +160,7 @@ io.on('connection', function(socket) {
      */
     socket.on('user-login', function(user, callback) {
 
-        // Check if user doesn't exist
+        // Check if user doesn't exist (make a login/passwd connection)
         let userIndex = -1;
         for(i = 0; i < users.length; i++) {
             if(users[i].username === user.username) {
@@ -180,9 +204,9 @@ io.on('connection', function(socket) {
      * Add message to history and purge if necessary
      */
     socket.on('chat-message', function(message) {
-        message.username = loggedUser.username;     // adding user
-        io.emit('redirected-message', message);     // re-emit message to all user
-        messages.push(message);                     // push message to history (MongoDB)
+        message.sender = loggedUser.username;     // adding sender to message object
+        io.emit('redirected-message', message);   // re-emit message to all user
+        messages.push(message);                   // push message to history (MongoDB)
         if (messages.length > MSG_LIMIT) {
             messages.splice(0, 1);
         }
