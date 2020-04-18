@@ -99,7 +99,8 @@ $('#chat form').submit(function(e) {
     e.preventDefault();                 // avoid page reloading during form validation
     // JSON message
     let message = {
-        text : $('#m').val()
+        text : $('#m').val(),
+        sent_at : new Date()
     };
     $('#m').val('');                            // dump text field
     if (message.text.trim().length !== 0) { 
