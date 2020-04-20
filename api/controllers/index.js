@@ -7,7 +7,7 @@ const Models = require('../models');
  * @param {Function} fn 
  */
 function exists(name, fn) {
-    Models.User.findOne( {username: name})
+    Models.User.findOne( {username: name} )
     .exec(function (err, user) {
         if (user != null) {
             fn(err, user);
@@ -92,11 +92,16 @@ function getUserMessages(req, res) {
     USER CONTROLLERS
 ==============================================================*/
 
+/**
+ * Create a new user
+ * @param {*} req 
+ * @param {*} res 
+ */
 function createUser(req, res) {
 
     // check if user already exists
     exists(req.body.username, function (err, user) {
-        if (user != null) return res.json( {message: 'user already exists'} );
+        if (user != null) return res.json( {message: "user already exists"} );
         // create new user
         const new_user = Models.User({      
             username: req.body.username
@@ -114,10 +119,46 @@ function createUser(req, res) {
 }
 
 
+/**
+ * Get a user
+ * @param {*} req 
+ * @param {*} res 
+ */
+function getUser(req, res) {
+
+    // check if user exists
+    exists(req.params.username, function (err, user) {
+        if (err) return res.status(404).json( {error: err} );   // user not found
+        res.json(user);
+    })
+}
+
+
+/**
+ * Return the user who sent the most messages
+ * @param {*} req 
+ * @param {*} res 
+ */
+function getBestSender(req, res) {
+    Models.Message.aggregate([
+        {"$group": {_id: "$sender", count: {"$sum": 1}}},     // group by username and count its occurences
+        {"$sort": {count: -1}},                               // sort result by occurence
+        {"$lookup": {from: "users", localField: "_id", foreignField: "_id", as: "user"}},    // join collections to populate resulting _id
+        {"$limit": 1}                                         // get the max repeated record
+    ]).exec( function (err, users) {
+        if (err) next(err);
+        delete users[0]._id;    // removing useless _id key
+        res.json(users[0]);
+    });
+}
+
+
 // EXPORTS
 module.exports = {
     getAllMessages : getAllMessages,
     getUserMessages : getUserMessages,
     postMessage : postMessage,
-    createUser : createUser
+    createUser : createUser,
+    getUser : getUser,
+    getBestSender : getBestSender
 };

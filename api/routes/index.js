@@ -8,6 +8,25 @@ const user_url = base_url + '/user'
 
 
 /*============================================================
+    SPECIFIC ROUTING
+==============================================================*/
+
+/**
+ * Get the user who sent the most messages
+ */
+router.get(base_url + '/bestsender', (req, res) => {
+    controller.getBestSender(req, res);
+});
+
+/**
+ * Get the user who has been tagged the most
+ */
+router.get(base_url + '/mostTagged', (req, res) => {
+    // controller
+});
+
+
+/*============================================================
     MESSAGE ROUTING
 ==============================================================*/
 
@@ -54,22 +73,8 @@ router.post(user_url, (req, res) => {
 /**
  * Get a user
  */
-router.get(user_url, (req, res) => {
-    // controller
-});
-
-/**
- * Get the user who sent the most messages
- */
-router.get(user_url + '/bestsender', (req, res) => {
-    // controller
-});
-
-/**
- * Get the user who received the most messages
- */
-router.get(user_url + '/bestreceiver', (req, res) => {
-    // controller
+router.get(user_url + '/:username', (req, res) => {
+    controller.getUser(req, res);
 });
 
 
