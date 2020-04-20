@@ -7,7 +7,10 @@ const PORT = 3000;
 
 // User http requests are redirected to 'public' folder
 app.use("/", express.static(__dirname + "/../public"));
+
+// Express
 app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // API
 const APIRoutes = require('../api/routes');
