@@ -21,7 +21,6 @@ function scrollToBottom() {
  */
 socket.on('user-login', function(user) {
     if(user !== undefined) {
-        console.log(user);
         $('#users').append($('<li class="' + user.username + ' new">').html(user.username + '<span class="typing">typing...</span>'));
         setTimeout(function () {
             $('#users li.new').removeClass('new');
@@ -104,8 +103,14 @@ $('#chat form').submit(function(e) {
         sent_at : new Date()
     };
     $('#m').val('');                            // dump text field
-    if (message.text.trim().length !== 0) { 
-        socket.emit('chat-message', message);   // emit event with associated message
+    if (message.text.trim().length !== 0) {
+        // check if user requested a chat cmd (!exemple)
+        let reg = new RegExp('^![a-z]+');
+        if (reg.test(message.text)) {
+            socket.emit('chat-cmd', message);       // emit chat cmd event
+        } else {
+            socket.emit('chat-message', message);   // emit chat message event
+        }
     }
     $('#chat input').focus();   // focus on message field
 });
