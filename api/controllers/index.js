@@ -1,18 +1,21 @@
 const Models = require('../models');
+const redis = require('../../utils');
 
 
 /**
- * Check if a user exists in database. If so, pass it to callback function.
- * @param {String} name 
+ * Check if a document exists in database. If so, pass it to callback function.
+ * @param {*} model 
+ * @param {JSON} filter 
  * @param {Function} fn 
  */
-function exists(name, fn) {
-    Models.User.findOne( {username: name} )
-    .exec(function (err, user) {
-        if (user != null) {
-            fn(err, user);
+function exists(model, filter, fn) {
+    model.findOne(filter)
+    .exec(function (err, doc) {
+        if (err) throw err;
+        if (doc != null) {
+            fn(err, doc);
         } else {
-            fn('user not found', null);
+            fn('doc not found', null);
         }
     });
 }
@@ -46,7 +49,7 @@ function getAllMessages(req, res) {
 function postMessage(req, res) {
     
     // find sender
-    exists(req.body.sender, function (err, user) {
+    exists(Models.User, {username: req.body.sender}, function (err, user) {
         // user not found
         if (err) return res.status(404).json( {error: err} );
         // create new message
@@ -74,9 +77,9 @@ function postMessage(req, res) {
 function getUserMessages(req, res) {
 
     // find user
-    exists(req.params.username, function (err, user) {
+    exists(Models.User, {username: req.body.username}, function (err, user) {
         // user not found
-        if (err) return res.status(404).json( {error: err} );
+        if (err) return res.status(404).json( {error: 'user not found'} );
         // find all of his messages
         Models.Message.find( {sender: user._id} )
         .populate('sender')
@@ -100,7 +103,7 @@ function getUserMessages(req, res) {
 function createUser(req, res) {
 
     // check if user already exists
-    exists(req.body.username, function (err, user) {
+    exists(Models.User, {username: req.body.username}, function (err, user) {
         if (user != null) return res.json( {message: "user already exists"} );
         // create new user
         const new_user = Models.User({      
@@ -109,13 +112,31 @@ function createUser(req, res) {
         // save it
         new_user.save( function (err2, saved_user) {    
             if (err2) throw err2;
-            console.log(saved_user);
             res.status(201).json({
                 message: 'success',
                 inserted_id: saved_user._id
             });
         });
     });
+}
+
+
+/**
+ * Delete a user
+ * @param {*} req 
+ * @param {*} res 
+ */
+function deleteUser(req, res) {
+
+    // check if user exists
+    exists(Models.User, {username: req.body.username}, function (err, user) {
+        if (err) return res.status(404).json( {error: 'user not found'} );
+        // remove him
+        Models.User.deleteOne(user, function (err2) {
+            if (err2) throw err2;
+            res.status(204);
+        });
+    })
 }
 
 
@@ -127,12 +148,43 @@ function createUser(req, res) {
 function getUser(req, res) {
 
     // check if user exists
-    exists(req.params.username, function (err, user) {
-        if (err) return res.status(404).json( {error: err} );   // user not found
+    exists(Models.User, {username: req.params.username}, function (err, user) {
+        if (err) return res.status(404).json( {error: 'user not found'} );
         res.json(user);
     })
 }
 
+
+/*============================================================
+    COMMANDS CONTROLLERS
+==============================================================*/
+
+/**
+ * Return informations about a command
+ * @param {*} req 
+ * @param {*} res 
+ */
+function getCommandInfo(req, res) {
+    exists(Models.Command, {label: req.params.cmd}, function (err, cmd) {
+       if (err) return res.status(404).json( {error: 'comand not found'} );
+       res.json(cmd);
+    });
+}
+
+/**
+ * Create informations about a command
+ * @param {*} req 
+ * @param {*} res 
+ */
+function createCommandInfo(req, res) {
+    Models.Command.findOneAndUpdate({label: req.body.label}, req.body, {upsert: true}, function (err, cmd) {
+        if (err) throw err;
+        res.status(201).json({
+            message: 'success',
+            inserted_id: cmd._id
+        });
+    });
+}
 
 /**
  * Return the user who sent the most messages
@@ -148,7 +200,36 @@ function getBestSender(req, res) {
     ]).exec( function (err, users) {
         if (err) next(err);
         delete users[0]._id;    // removing useless _id key
+        users[0].user = users[0].user[0];
         res.json(users[0]);
+    });
+}
+
+/**
+ * Get informations about current logged users
+ * @param {*} req 
+ * @param {*} res 
+ */
+function getCurrentUsers(req, res) {
+    redis.getList('usr_connected', function (users) {
+        if(users == null) res.status(404).json({error: 'logged users list not found'});
+        // JSON parse each user
+        for(i = 0; i < users.length; i++) {
+            users[i] = JSON.parse(users[i]);
+        }
+        res.json(users);
+    });
+}
+
+/**
+ * Get the current number of logged users in chat room
+ * @param {*} req 
+ * @param {*} res 
+ */
+function getNbUsers(req, res) {
+    redis.getList('usr_connected', function (users) {
+        if(users == null) res.status(404).json({error: 'logged users list not found'});
+        res.json({'count': users.length});
     });
 }
 
@@ -159,6 +240,11 @@ module.exports = {
     getUserMessages : getUserMessages,
     postMessage : postMessage,
     createUser : createUser,
+    deleteUser : deleteUser,
     getUser : getUser,
-    getBestSender : getBestSender
+    getCommandInfo : getCommandInfo,
+    createCommandInfo : createCommandInfo,
+    getBestSender : getBestSender,
+    getNbUsers : getNbUsers,
+    getCurrentUsers : getCurrentUsers
 };
