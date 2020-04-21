@@ -3,25 +3,61 @@ const controller = require('../controllers');
 
 // url
 const base_url = '/api';
-const message_url = base_url + '/message'
-const user_url = base_url + '/user'
+const message_url = base_url + '/message';
+const user_url = base_url + '/user';
+const cmd_url = base_url + '/cmd';
 
 
 /*============================================================
-    SPECIFIC ROUTING
+    COMMANDS ROUTING
 ==============================================================*/
+
+/**
+ * Get all available commands
+ */
+router.get(cmd_url, (req, res) => {
+    controller.getCommandInfo(req, res);
+});
+
+/**
+ * Create informations about a command
+ */
+router.post(cmd_url + '/info', (req, res) => {
+    controller.createCommandInfo(req, res);
+});
+
+/**
+ * Get informations about a specific command
+ */
+router.get(cmd_url + '/info/:cmd', (req, res) => {
+    controller.getCommandInfo(req, res);
+});
+
+/**
+ * Get the current number of user in room chat
+ */
+router.get(cmd_url + '/nbusers', (req, res) => {
+    controller.getNbUsers(req, res);
+});
+
+/**
+ * Get current users in room chat
+ */
+router.get(cmd_url + '/currentusers', (req, res) => {
+    controller.getCurrentUsers(req, res);
+});
 
 /**
  * Get the user who sent the most messages
  */
-router.get(base_url + '/bestsender', (req, res) => {
+router.get(cmd_url + '/bestsender', (req, res) => {
     controller.getBestSender(req, res);
 });
 
 /**
  * Get the user who has been tagged the most
  */
-router.get(base_url + '/mostTagged', (req, res) => {
+router.get(cmd_url + '/mostTagged', (req, res) => {
     // controller
 });
 
@@ -51,13 +87,6 @@ router.get(message_url + '/:username', (req, res) => {
     controller.getUserMessages(req, res);
 });
 
-/**
- * Get all messages up to n-minutes old
- */
-router.get(message_url + '/history', (req, res) => {
-    // controller
-});
-
 
 /*============================================================
     USER ROUTING
@@ -68,6 +97,13 @@ router.get(message_url + '/history', (req, res) => {
  */
 router.post(user_url, (req, res) => {
     controller.createUser(req, res);
+});
+
+/**
+ * Delete a user
+ */
+router.delete(user_url, (req, res) => {
+    controller.deleteUser(req, res);
 });
 
 /**
