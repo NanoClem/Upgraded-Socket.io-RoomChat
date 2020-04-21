@@ -8,6 +8,7 @@ const client = redis.createClient();
  */
 var getList = function (key, fn) {
     client.lrange(key, 0, -1, function (err, res) {
+        if (err) console.log(err);
         fn(res);
     });
 }
@@ -19,7 +20,7 @@ var getList = function (key, fn) {
  */
 var addElementTo = function(key, elem) {
     client.rpush([key, JSON.stringify(elem)], function (err, res) {
-        console.log(err);
+        if (err) console.log(err);
     });
 }
 
@@ -30,7 +31,7 @@ var addElementTo = function(key, elem) {
  */
 var removeElementFrom = function (key, elem) {
     client.lrem([key, 0, JSON.stringify(elem)], function (err, res) {
-        // do something on delete
+        if (err) console.log(err);
     });
 }
 
