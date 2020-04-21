@@ -18,6 +18,7 @@ const User = new Schema({
  */
 const Message = new Schema({
     text : String,
+    type: String,
     sender : {
         type: Schema.Types.ObjectId, 
         ref: 'User'
