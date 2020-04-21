@@ -21,6 +21,7 @@ function scrollToBottom() {
  */
 socket.on('user-login', function(user) {
     if(user !== undefined) {
+        console.log(user);
         $('#users').append($('<li class="' + user.username + ' new">').html(user.username + '<span class="typing">typing...</span>'));
         setTimeout(function () {
             $('#users li.new').removeClass('new');
@@ -45,7 +46,7 @@ socket.on('disconnect', function() {
  * Event reception : message
  */
 socket.on('redirected-message', function(message) {
-    $('#messages').append($('<li>').html('<span class="username">' + message.username + '</span>' + message.text));
+    $('#messages').append($('<li>').html('<span class="username">' + message.sender + '</span>' + message.text));
     scrollToBottom();
 });
 
