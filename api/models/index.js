@@ -29,9 +29,22 @@ const Message = new Schema({
     }
 });
 
+/**
+ * Commands model
+ */
+const Command = new Schema({
+    label: String,
+    text: String,
+    created_at : {
+        type: Date,
+        default: Date.now
+    }
+});
+
 
 // EXPORTS
 module.exports = {
     User: mongoose.model('User', User),
     Message: mongoose.model('Message', Message),
+    Command: mongoose.model('Command', Command)
 };
