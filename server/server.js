@@ -2,8 +2,11 @@
 const express = require('express');
 const app = express();
 const http = require('http').Server(app);
+const request = require('request');
 const io = require('socket.io')(http);
+const HOST = 'http://localhost';
 const PORT = 3000;
+const URL = HOST + ":" + PORT;
 
 // User http requests are redirected to 'public' folder
 app.use("/", express.static(__dirname + "/../public"));
@@ -18,7 +21,7 @@ app.use(APIRoutes);
 
 // Redis
 const redisUtils = require('./redis_utils');
-const client = redisUtils.Rclient;
+const Rclient = redisUtils.Rclient;
 
 // Body parser
 const bodyParser = require('body-parser');
@@ -45,26 +48,24 @@ mongoose.connect(database, (err)=> {
 /**
  * Listening redis error
  */
-client.on('error', function (error) {
+Rclient.on('error', function (error) {
     console.error(error);
 })
 
 /**
  * Listening connection on redis server
  */
-client.on('connect', function (err, res) {
+Rclient.on('connect', function (err, res) {
     console.log('connected to redis server');
 })
 
 
 /**
- * Connected user list (Redis)
+ * Connected user list params (Redis)
  */
 var k_users = "usr_connected";
 var users = [];
-redisUtils.getList(k_users, function (list) {   
-    users = list;
-});
+Rclient.del(k_users);   // remove existing key to avoid conflicts
 
 /**
  * User currently typing in chat input
@@ -99,13 +100,13 @@ io.on('connection', function(socket) {
      * Last connected user
      */
     var loggedUser;
-
    
+    
     /**
      * Event emission : send connected user list to all connected users
      */
     for(i = 0; i < users.length; i++) {
-        socket.emit('user-login', users[i]);
+        socket.emit('user-login', JSON.parse(users[i]));
     }
 
 
@@ -114,7 +115,7 @@ io.on('connection', function(socket) {
      */
     for (i = 0; i < messages.length; i++) {
         if (messages[i].username !== undefined) {
-            socket.emit('redirected-message', messages[i]);
+            socket.emit('redirected-message', JSON.parse(messages[i]));
         }
         else {
             socket.emit('service-message', messages[i])
@@ -166,7 +167,7 @@ io.on('connection', function(socket) {
         // Check if user doesn't exist (make a login/passwd connection)
         let userIndex = -1;
         for(i = 0; i < users.length; i++) {
-            if(users[i].username === user.username) {
+            if (users[i].username === user.username) {
                 userIndex = i;
             }
         }
@@ -208,8 +209,15 @@ io.on('connection', function(socket) {
      */
     socket.on('chat-message', function(message) {
         message.sender = loggedUser.username;     // adding sender to message object
+        message.type = "chat-message";            // defining message type
         io.emit('redirected-message', message);   // re-emit message to all user
-        messages.push(message);                   // push message to history (MongoDB)
+        messages.push(message);                   // push message to history
+        // store message in database
+        request.post(URL + "/api/message", {json: true, body: message}, function (err, res, body) {
+            if (err) console.log(err);  // log err
+            if (res.statusCode != 201) console.log(body);
+        });
+        // check if history container is full
         if (messages.length > MSG_LIMIT) {
             messages.splice(0, 1);
         }
