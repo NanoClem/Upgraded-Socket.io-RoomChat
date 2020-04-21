@@ -74,7 +74,7 @@ function postMessage(req, res) {
 function getUserMessages(req, res) {
 
     // find user
-    exists(req.body.username, function (err, user) {
+    exists(req.params.username, function (err, user) {
         // user not found
         if (err) return res.status(404).json( {error: err} );
         // find all of his messages
