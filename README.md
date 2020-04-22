@@ -10,27 +10,14 @@ A web socket chat using :
 
 ## Project description
 
-## Installation
+### Installation
 If you don't have NodeJS installed yet, [get it here](https://nodejs.org)  
 Go to the project root folder and install dependencies by running :
 ```bash
 npm install 
 ```
 
-## Setup Redis
-The app need redis to store logged users. Since it runs on default configurations, just open a terminal and run :
-````bash
-redis-server
-````
-
-## Setup MongoDB
-Open a new terminal and run :
-````bash
-mongod --port 3000 --dbpath your_data_folder_path
-````
-
-## Run app
-You are now free to run the app ! Go to the project root folder and run in a new terminal :
-````bash
-node server/server.js
-````
+### Setup and Run
+1. Since Redis runs on default configurations, just open a terminal and run `redis-server`
+2. Init MongoDB with `mongod --port 3000 --dbpath your_data_folder_path`
+3. You are now free to run the app ! Go to the project root folder and run `node server/server.js`
