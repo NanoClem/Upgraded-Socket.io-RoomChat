@@ -12,7 +12,7 @@ A web socket chat using :
 As it consists in a "in and out" chat, a user is deleted from database when he disconnects, but all of his messaged are kept. This can be improved by a simple login mechanism, since a username can be used by several people through time (only if the username isn't currently used by someone logged in the chat room).
 
 ### Chat commands
-User can type special commands in chat. It must always begin with a "!". 
+Users can type special commands in chat. It must always begin with a "!". 
 See below the full command list :  
 * `!bestsender` : shows the user who sent the most messages in the room
 * `!nbusers` : shows the number of logged user in the room
