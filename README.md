@@ -19,7 +19,19 @@ npm install
 ```
 
 ## Setup Redis
-The app need redis to store logged user. Since it runs on default configurations, just open a terminal and run :
+The app need redis to store logged users. Since it runs on default configurations, just open a terminal and run :
 ````bash
 redis-server
+````
+
+## Setup MongoDB
+Open a new terminal and run :
+````bash
+mongod --port 3000 --dbpath your_data_folder_path
+````
+
+## Run app
+You are now free to run the app ! Go to the project root folder and run in a new terminal :
+````bash
+node server/server.js
 ````
