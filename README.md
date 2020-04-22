@@ -1,31 +1,23 @@
 # Upgraded-Socket.io-RoomChat
 
 A web socket chat using :  
-* [node]() framework 
+* [NodeJS](https://nodejs.org) framework 
 * [socket.io](https://socket.io/docs)
-* [redis]()
+* [redis](https://redis.io)
 * [MongoDB]()
 
-**This project is an upgraded version off [this exemple](https://github.com/Applelo/Socket.io-Room-Chat)**
+**This project is an upgraded version of [this tutorial](https://github.com/Applelo/Socket.io-Room-Chat)**
 
 ## Installation
 
-If you don't have Python installed yet, [get it here](https://www.python.org/downloads)  
-I recommend you to use the package manager [pip](https://pip.pypa.io/en/stable/) to setup a virtual environment. I personnaly used [virtualenv](https://virtualenv.pypa.io/en/latest), but you're free to choose one that suits you best.  
-Go to the project root folder and type the following commands :
-
+If you don't have NodeJS installed yet, [get it here](https://nodejs.org)  
+Go to the project root folder and install dependencies by running :
 ```bash
-pip install virtualenv
-virtualenv venv
-```
-Then, install all packages in requirements.txt on your venv :  
-```bash
-pip install -r requirements.txt
+npm install 
 ```
 
-## Setup project
-
-The project needs a .env file for configuration, it should contain :  
+## Setup Redis
+The app need  
 ````bash
 DB_URI = your neo4j graph database uri
 USERNAME = username for authenication in the current graph
