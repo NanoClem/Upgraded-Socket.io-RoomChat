@@ -9,7 +9,7 @@ A web socket chat using :
 **This project is an upgraded version of [this tutorial](https://github.com/Applelo/Socket.io-Room-Chat).**
 
 ## Project description
-As it consists in a "in and out" chat, a user is deleted from database when he disconnects, but all of his message are kept. This can be improved by a simple login mechanism, since a username can be used by several people through time (only if the username isn't currently used by someone logged in the chat room).
+As it consists in a "in and out" chat, a user is deleted from database when he disconnects, but all of his message are kept. This can be problematic since a username can be used by several people through time (only if the username isn't currently used by someone logged in the chat room). It can be improved by a simple login mechanism.
 
 ### Chat commands
 Users can type special commands in chat. It must always begin with a "!". 
