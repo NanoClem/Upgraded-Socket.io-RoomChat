@@ -28,7 +28,7 @@ npm install
 ### Setup and Run
 1. Since Redis runs on default configurations, just open a terminal and run `redis-server`
 2. Init MongoDB with `mongod --port 3000 --dbpath your_data_folder_path`
-3. Note that you can make a replica set in MongoDB for more fault tolerance, [see here how to do it](https://docs.mongodb.com/manual/replication)
+3. Note that you can make replica sets in MongoDB for more fault tolerance, [see here how to do it](https://docs.mongodb.com/manual/replication)
 4. You are now free to run the app ! Go to the project root folder and run `node server/server.js`
 
 ## Possible improvements
