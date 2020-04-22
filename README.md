@@ -1,12 +1,12 @@
 # Upgraded-Socket.io-RoomChat
 
-A web socket chat made using :  
+A web socket chat using :  
 * [node]() framework 
 * [socket.io](https://socket.io/docs)
 * [redis]()
 * [MongoDB]()
 
-**This project is based on [this exemple](https://github.com/Applelo/Socket.io-Room-Chat), with 
+**This project is an upgraded version off [this exemple](https://github.com/Applelo/Socket.io-Room-Chat)**
 
 ## Installation
 
