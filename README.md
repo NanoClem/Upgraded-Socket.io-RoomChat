@@ -11,7 +11,6 @@ A web socket chat using :
 ## Project description
 
 ## Installation
-
 If you don't have NodeJS installed yet, [get it here](https://nodejs.org)  
 Go to the project root folder and install dependencies by running :
 ```bash
