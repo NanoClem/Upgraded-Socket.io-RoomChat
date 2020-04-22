@@ -6,7 +6,9 @@ A web socket chat using :
 * [redis](https://redis.io)
 * [MongoDB]()
 
-**This project is an upgraded version of [this tutorial](https://github.com/Applelo/Socket.io-Room-Chat)**
+**This project is an upgraded version of [this tutorial](https://github.com/Applelo/Socket.io-Room-Chat).**
+
+## Project description
 
 ## Installation
 
@@ -17,9 +19,7 @@ npm install
 ```
 
 ## Setup Redis
-The app need  
+The app need redis to store logged user. Since it runs on default configurations, just open a terminal and run :
 ````bash
-DB_URI = your neo4j graph database uri
-USERNAME = username for authenication in the current graph
-PASSWORD = password for authentication in the current graph
+redis-server
 ````
